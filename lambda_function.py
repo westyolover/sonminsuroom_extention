@@ -3,6 +3,7 @@ import base64
 import boto3
 import uuid
 import os
+import urllib.parse
 
 # --- 1. 환경 설정 ---
 S3_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME', 'smct-ht-10-extention')
@@ -79,57 +80,36 @@ def lambda_handler(event, context):
             'details': str(e)
         })
 
-        # --- 4. Bedrock 호출 2: 검색 및 링크 추천 (안전 버전) ---
+        # --- 4. Bedrock 2차 호출 (삭제) ---
+# (기존의 "Bedrock 호출 2" try-except 블록 전체를 삭제합니다)
+
+
+# --- 4. (변경) 검색 링크 직접 생성 ---
     try:
+        # 1차 Bedrock 호출에서 받은 검색 키워드 활용
+        if not search_keywords:
+            # 키워드가 비어있으면 식별된 아이템 이름을 기본값으로 사용
+            primary_keyword = identified_item
+        else:
+            # 1순위 키워드 사용
+            primary_keyword = search_keywords[0] 
 
-        # keyFeatures를 JSON 문자열로 변환
-        key_features_json = json.dumps(key_features, ensure_ascii=False)
+        # URL에 사용하기 위해 키워드를 인코딩합니다 (예: "불닭 볶음면" -> "불닭%20볶음면")
+        query = urllib.parse.quote(primary_keyword)
 
-        prompt_text_2 = f"""당신은 '비주얼 쇼퍼(Visual Shopper)' AI 어시스턴트입니다.
+        # 실제 쇼핑몰의 검색 URL을 생성합니다
+        buy_links = {
+            "네이버쇼핑 검색": [f"https://search.shopping.naver.com/search/all?query={query}"],
+            "쿠팡에서 검색": [f"https://www.coupang.com/np/search?q={query}"],
+            "G마켓에서 검색": [f"https://browse.gmarket.co.kr/search?keyword={query}"]
+        }
 
-    아래는 이미지 분석 결과입니다:
-    - 식별된 대상: "{identified_item}"
-    - 주요 특징: {key_features_json}
-
-    이 정보를 바탕으로 실제 구매 가능한 링크를 제공하세요.
-
-    ## 출력 형식(JSON)
-    아래 예시 형식을 그대로 따라 JSON으로만 응답하세요:
-
-    {{
-    "identifiedItem": "{identified_item}",
-    "keyFeatures": {key_features_json},
-    "buyLinks": {{
-        "정확한 제품": ["링크1 (공식 스토어 또는 동일 제품)"],
-        "유사한 제품": ["링크2 (비슷한 디자인/브랜드)", "링크3 (대체 가능한 상품)"]
-    }}
-    }}
-
-    ## 추가 지침:
-    - 실제 존재하는 한국 전자상거래 사이트(쿠팡, 네이버쇼핑, 무신사, 지마켓 등)의 링크를 사용하세요.
-    - 정확한 제품을 찾을 수 없을 경우, '유사한 제품'만 제공해도 괜찮습니다.
-    - 절대로 설명 문장이나 분석 문장을 추가하지 말고, JSON만 반환하세요."""
-
-        # 모델 호출
-        result_str = invoke_bedrock_text(prompt_text_2)
-        print("Bedrock Call 2 Response:", result_str)  # CloudWatch에 확인용 로그
-
-        # 안전하게 JSON 파싱
-        try:
-            result_data = json.loads(result_str)
-        except json.JSONDecodeError:
-            print("Bedrock Call 2 - JSON 파싱 실패, 기본값 사용")
-            result_data = {
-                "identifiedItem": identified_item,
-                "keyFeatures": key_features,
-                "buyLinks": {}
-            }
-
+        # Bedrock 2차 호출 결과 대신, 위에서 직접 만든 링크로 응답을 구성합니다.
         final_response_body = {
             "status": "success",
-            "identifiedItem": result_data.get("identifiedItem", identified_item),
-            "keyFeatures": result_data.get("keyFeatures", key_features),
-            "buyLinks": result_data.get("buyLinks", {}),
+            "identifiedItem": identified_item,
+            "keyFeatures": key_features,
+            "buyLinks": buy_links,  # ⭐️ 직접 생성한 링크 딕셔너리
             "capturedImageUrl": presigned_url,
             "capturedImageS3Url": f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/uploads/{image_key}"
         }
@@ -138,7 +118,7 @@ def lambda_handler(event, context):
 
     except Exception as e:
         return create_response(500, {
-            'error': 'Failed - Bedrock Call 2 (Shopping Links).',
+            'error': 'Failed - Link Generation.',
             'details': str(e)
         })
 
