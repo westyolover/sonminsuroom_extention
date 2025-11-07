@@ -1,0 +1,126 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 10px;
+  width: 320px;
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.card {
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#captured-image {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e4e4e7;
+  margin-bottom: 12px;
+}
+
+h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+h4 {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #71717a;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #f4f4f5;
+  padding-bottom: 4px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e4e4e7;
+  margin: 16px 0;
+}
+
+/* 키 특징 (태그) */
+#key-features-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.8em;
+  background-color: #eef2ff;
+  color: #4338ca;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+/* 구매 링크 */
+#buy-links-container .buy-link {
+  display: block;
+  padding: 8px 12px;
+  background-color: #fafafa;
+  color: #007bff;
+  text-decoration: none;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.9em;
+  font-weight: 500;
+  border: 1px solid #e4e4e7;
+  transition: background-color 0.2s;
+}
+
+#buy-links-container .buy-link:hover {
+  background-color: #f4f4f5;
+}
+
+
+/* 로더 */
+#loader {
+  text-align: center;
+  padding: 20px;
+  font-size: 1em;
+  color: #52525b;
+}
+
+.spinner {
+  margin: 10px auto;
+  border: 4px solid #e4e4e7;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 오류 메시지 */
+#error-message {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* 숨김 클래스 */
+.hidden {
+  display: none;
+}
