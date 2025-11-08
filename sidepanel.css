@@ -55,8 +55,8 @@ hr {
 .tag {
   display: inline-block;
   font-size: 0.8em;
-  background-color: #eef2ff;
-  color: #4338ca;
+  background-color: #deeffb;
+  color: navy;
   padding: 4px 8px;
   border-radius: 16px;
   font-weight: 500;
@@ -67,7 +67,7 @@ hr {
   display: block;
   padding: 8px 12px;
   background-color: #fafafa;
-  color: #007bff;
+  color: #246681;
   text-decoration: none;
   border-radius: 6px;
   margin-bottom: 6px;
@@ -123,4 +123,71 @@ hr {
 /* 숨김 클래스 */
 .hidden {
   display: none;
+}
+
+.title-container {
+  display: flex;
+  justify-content: space-between;
+  /* 제목은 왼쪽, 버튼은 오른쪽 */
+  align-items: center;
+  margin-bottom: 8px;
+  /* h2에서 가져온 여백 */
+}
+
+/* 2. [수정] h2의 기존 여백 제거 */
+h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  /* 👈 여백을 title-container로 이동 */
+}
+
+/* sidepanel.css 파일 맨 아래에 추가 또는 교체 */
+
+.title-container {
+  display: flex;
+  /* 한 줄에 정렬 */
+  align-items: center;
+  /* 세로 중앙 맞춤 */
+  gap: 20px;
+  /* 제목과 버튼 사이 간격 */
+}
+
+/* 2. [수정] h2 스타일 */
+h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  display: inline;
+}
+
+/* 3. [수정] 장바구니 버튼 스타일 */
+#cart-button {
+  background-color: #246681;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  /* 👈 [추가] 버튼이 찌그러지지 않도록 크기 고정 */
+  display: inline-flex;
+}
+
+/* (이전 cart-button:hover, :active 스타일은 그대로 두셔도 됩니다) */
+#cart-button:hover {
+  background-color: #b6cddc;
+}
+
+#cart-button:active {
+  background-color: #004085;
 }

@@ -2,6 +2,7 @@
 
 // --- 0. Lambda API 엔드포인트 ---
 const API_ENDPOINT = "https://fne8x5xlc6.execute-api.us-east-1.amazonaws.com/identify-food";
+const SAVE_API_ENDPOINT = "https://fne8x5xlc6.execute-api.us-east-1.amazonaws.com/save";
 
 // --- 0.5. DOM 요소 선택 (새 HTML 구조에 맞게 수정) ---
 const loader = document.getElementById("loader");
@@ -11,6 +12,7 @@ const capturedImage = document.getElementById("captured-image");
 const itemName = document.getElementById("item-name");
 const keyFeaturesContainer = document.getElementById("key-features-container");
 const buyLinksContainer = document.getElementById("buy-links-container");
+let currentItemData = null;
 
 
 // --- 1. 백그라운드 메시지 수신 (🚨 [수정됨] sendToLambda 호출) ---
@@ -118,6 +120,7 @@ function renderUI(data) {
   hideAllCards();
 
   if (data.status === "success") {
+    currentItemData = data;
     // (1) 이미지, 아이템 이름 설정
     // ⭐️ 참고: Lambda 응답의 'capturedImageUrl' 키를 사용합니다.
     capturedImage.src = data.capturedImageUrl;
@@ -137,20 +140,23 @@ function renderUI(data) {
     // (3) 구매 링크(Buy Links) 렌더링
     buyLinksContainer.innerHTML = ''; // 초기화
     if (data.buyLinks) {
-      // "정확한 제품" 링크
-      if (data.buyLinks["정확한 제품"] && data.buyLinks["정확한 제품"].length > 0) {
-        buyLinksContainer.appendChild(createLinkHeader("정확한 제품"));
-        data.buyLinks["정확한 제품"].forEach(link => {
-          buyLinksContainer.appendChild(createLinkElement(link, "구매하기"));
-        });
-      }
-      // "유사한 제품" 링크
-      if (data.buyLinks["유사한 제품"] && data.buyLinks["유사한 제품"].length > 0) {
-        buyLinksContainer.appendChild(createLinkHeader("유사한 제품"));
-        data.buyLinks["유사한 제품"].forEach(link => {
-          buyLinksContainer.appendChild(createLinkElement(link, "보러가기"));
-        });
-      }
+
+      // ⭐️ [이 부분 수정] ⭐️
+      // "정확한 제품" 대신, 객체에 있는 모든 키를 순회합니다.
+      Object.keys(data.buyLinks).forEach(key => {
+        const links = data.buyLinks[key];
+
+        if (links && links.length > 0) {
+          // key("네이버쇼핑 검색")를 헤더로 사용
+          buyLinksContainer.appendChild(createLinkHeader(key));
+
+          links.forEach(link => {
+            // "구매하기" 대신 "검색하러 가기"
+            buyLinksContainer.appendChild(createLinkElement(link, "검색하러 가기"));
+          });
+        }
+      });
+      // ⭐️ [수정 끝] ⭐️
     }
 
     showElement(shopperCard);
@@ -199,3 +205,46 @@ function showError(msg) {
   errorMessage.textContent = msg;
   showElement(errorMessage);
 }
+// sidepanel.js 파일 하단에 추가
+
+// ⭐️ 3. "저장" 버튼 클릭 이벤트 리스너
+document.getElementById('cart-button').addEventListener('click', async () => {
+  // 1단계에서 저장해 둔 데이터가 없으면 실행 중단
+  if (!currentItemData) {
+    alert("저장할 아이템이 없습니다.");
+    return;
+  }
+
+  // ⭐️ 4. Lambda가 요구하는 페이로드(payload) 생성
+  const payload = {
+    identifiedItem: currentItemData.identifiedItem,
+    buyLinks: currentItemData.buyLinks,
+    capturedImageS3Url: currentItemData.capturedImageS3Url
+  };
+
+  console.log("Saving item:", payload);
+
+  try {
+    const response = await fetch(SAVE_API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      // 서버에서 4xx, 5xx 응답을 보낸 경우
+      throw new Error('서버 저장에 실패했습니다.');
+    }
+
+    const result = await response.json();
+    console.log('Save success:', result);
+
+    // ⭐️ 5. 사용자에게 피드백
+    alert('아이템이 저장되었습니다!');
+    // 여기에 웹사이트 링크
+
+  } catch (error) {
+    console.error('Error saving item:', error);
+    alert('저장 중 오류가 발생했습니다.');
+  }
+});

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "한식 푸드 스캐너 (JS)",
+  "name": "Sonminsu Room (JS)",
   "version": "1.0",
   "description": "스크린샷으로 한식 정보를 알려줍니다.",
   "permissions": [
@@ -11,7 +11,7 @@
     "tabs"
   ],
   "action": {
-    "default_title": "음식 스캔하기"
+    "default_title": "스캔하기"
   },
   "background": {
     "service_worker": "background.js"
